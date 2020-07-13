@@ -29,7 +29,7 @@ ENDIF()
 
     # Postfix of so's:
 set(PROJECT_DLLVERSION)
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_INSTALL_PREFIX}/lib/cmake/ /usr/lib/cmake)
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_INSTALL_PREFIX}/lib/cmake/ /usr/lib/cmake share/cmake/${PROJECT_NAME})
 
 OPTION(BUILD_SHARED_LIBS 	"Set to OFF to build static libraries" ON)
 OPTION(BUILD_UTILS 	"Acitvates/Deactivates building utils  libraries" ON)
