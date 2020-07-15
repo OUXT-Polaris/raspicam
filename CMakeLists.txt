@@ -23,21 +23,10 @@ IF(NOT CMAKE_BUILD_TYPE )
    SET( CMAKE_BUILD_TYPE "Release" )
 ENDIF()
 
-#------------------------------------------------------
-# Lib Names and Dirs
-#------------------------------------------------------
-
-    # Postfix of so's:
-set(PROJECT_DLLVERSION)
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_INSTALL_PREFIX}/lib/cmake/ /usr/lib/cmake share/cmake/${PROJECT_NAME})
-
-OPTION(BUILD_SHARED_LIBS 	"Set to OFF to build static libraries" ON)
-OPTION(BUILD_UTILS 	"Acitvates/Deactivates building utils  libraries" ON)
-
 # ----------------------------------------------------------------------------
 #   Find Dependencies
 # ----------------------------------------------------------------------------
- #Add include to dependencies dir
+#Add include to dependencies dir
 include_directories(${PROJECT_SOURCE_DIR}/dependencies ${PROJECT_SOURCE_DIR}/dependencies/mmal  ${PROJECT_SOURCE_DIR}/dependencies/vcos)
 #find the mmal libraries(I use conditional because I normally comile in pc)
 
@@ -47,46 +36,68 @@ FIND_LIBRARY(mmalutil_LIBS NAMES mmal_util PATHS /opt/vc/lib)
 FIND_LIBRARY(mmal_LIBS NAMES mmal PATHS /opt/vc/lib)
 IF( (NOT mmal_LIBS ) OR (NOT mmalutil_LIBS) OR (NOT mmalcore_LIBS) )
     MESSAGE(FATAL_ERROR "Could not find mmal libraries")
- ENDIF()
- set(REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} ${mmalcore_LIBS} ${mmalutil_LIBS} ${mmal_LIBS}  )
+ENDIF()
+set(REQUIRED_LIBRARIES ${REQUIRED_LIBRARIES} ${mmalcore_LIBS} ${mmalutil_LIBS} ${mmal_LIBS}  )
 ENDIF()
 
 #If opencv installed, creates the libraspicam_cv library module
 FIND_PACKAGE(OpenCV)
 IF(OpenCV_FOUND)
-  include_directories(${OpenCV_INCLUDE_DIRS})
-  SET(LIB_COMPONENTS ${LIB_COMPONENTS} ${PROJECT_NAME}_cv)
-  SET(PROJECT_CV_CREATED_FLAG "YES")  
+include_directories(${OpenCV_INCLUDE_DIRS})
+SET(LIB_COMPONENTS ${LIB_COMPONENTS} ${PROJECT_NAME}_cv)
+SET(PROJECT_CV_CREATED_FLAG "YES")  
 ENDIF()
 
+find_package(ament_cmake QUIET)
 
- 
-# ----------------------------------------------------------------------------
-#   PROJECT CONFIGURATION
-#   force some variables that could be defined in the command line to be written to cache
-# ----------------------------------------------------------------------------
-OPTION(INSTALL_DOC 	"Set to ON to build/install Documentation" OFF)
-IF (INSTALL_DOC)
-    FIND_PACKAGE(Doxygen REQUIRED)
-    MESSAGE( STATUS "INSTALL_DOC:         ${INSTALL_DOC} ")
-    INCLUDE("${PROJECT_SOURCE_DIR}/generateDoc.cmake")
-    GENERATE_DOCUMENTATION(${PROJECT_SOURCE_DIR}/dox.in)
-ENDIF()
+if ( ament_cmake_FOUND )
+    set(BUILD_TOOL_INCLUDE_DIRS ${ament_INCLUDE_DIRS})
+    set( RASPICAM_LIB_DESTINATION   lib )
+    set( RASPICAM_INC_DESTINATION   include )
+    set( RASPICAM_BIN_DESTINATION   bin )
+    ament_export_include_directories(include)
+    ament_export_libraries(${LIB_COMPONENTS})
+    ament_package()
+else()
+    #------------------------------------------------------
+    # Lib Names and Dirs
+    #------------------------------------------------------
+
+        # Postfix of so's:
+    set(PROJECT_DLLVERSION)
+    SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_INSTALL_PREFIX}/lib/cmake/ /usr/lib/cmake share/cmake/${PROJECT_NAME})
+
+    OPTION(BUILD_SHARED_LIBS 	"Set to OFF to build static libraries" ON)
+    OPTION(BUILD_UTILS 	"Acitvates/Deactivates building utils  libraries" ON)
+    
+    # ----------------------------------------------------------------------------
+    #   PROJECT CONFIGURATION
+    #   force some variables that could be defined in the command line to be written to cache
+    # ----------------------------------------------------------------------------
+    OPTION(INSTALL_DOC 	"Set to ON to build/install Documentation" OFF)
+    IF (INSTALL_DOC)
+        FIND_PACKAGE(Doxygen REQUIRED)
+        MESSAGE( STATUS "INSTALL_DOC:         ${INSTALL_DOC} ")
+        INCLUDE("${PROJECT_SOURCE_DIR}/generateDoc.cmake")
+        GENERATE_DOCUMENTATION(${PROJECT_SOURCE_DIR}/dox.in)
+    ENDIF()
 
 
-# ----------------------------------------------------------------------------
-#   Uninstall target, for "make uninstall"
-# ----------------------------------------------------------------------------
-CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
-ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
+    # ----------------------------------------------------------------------------
+    #   Uninstall target, for "make uninstall"
+    # ----------------------------------------------------------------------------
+    CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake" IMMEDIATE @ONLY)
+    ADD_CUSTOM_TARGET(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 
-# ----------------------------------------------------------------------------
-# create configuration file from .in file (If you use windows take care with paths)
-# ----------------------------------------------------------------------------
-CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/config.cmake.in" "${PROJECT_BINARY_DIR}/Find${PROJECT_NAME}.cmake")
-CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/config.cmake.in" "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake")
-INSTALL(FILES "${PROJECT_BINARY_DIR}/Find${PROJECT_NAME}.cmake" DESTINATION share/cmake/${PROJECT_NAME} )
-INSTALL(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" DESTINATION share/cmake/${PROJECT_NAME} )
+    # ----------------------------------------------------------------------------
+    # create configuration file from .in file (If you use windows take care with paths)
+    # ----------------------------------------------------------------------------
+    CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/config.cmake.in" "${PROJECT_BINARY_DIR}/Find${PROJECT_NAME}.cmake")
+    CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/config.cmake.in" "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake")
+    INSTALL(FILES "${PROJECT_BINARY_DIR}/Find${PROJECT_NAME}.cmake" DESTINATION share/cmake/${PROJECT_NAME} )
+    INSTALL(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" DESTINATION share/cmake/${PROJECT_NAME} )
+
+endif()
 
 # ----------------------------------------------------------------------------
 #   Program Optimization and debug (Extracted from OpenCV)
