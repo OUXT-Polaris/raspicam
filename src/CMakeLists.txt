@@ -8,7 +8,7 @@ SET(srcs_base raspicam.cpp raspicam_still.cpp  private/private_impl.cpp private/
 if(NOT( ${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*) )#in a pc, adds fake dependencies to mmal functions to enable compilation
 SET(srcs_base ${srcs_base} private/fake_mmal_dependencies.cpp)
 endif()
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} )
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/include)
 
 ADD_LIBRARY(${PROJECT_NAME} ${hdrs_base} ${srcs_base} )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES 				# create *nix style library versions + symbolic links
@@ -28,7 +28,7 @@ INSTALL(TARGETS ${PROJECT_NAME}
 #Opencv Lib	
 IF (${OpenCV_FOUND})
 message(STATUS "Adding cv library")
-SET(hdrs_cv raspicam_cv.h raspicam_still_cv.h)
+SET(hdrs_cv ${PROJECT_SOURCE_DIR}/include/raspicam/raspicam_cv.h raspicam_still_cv.h)
 SET(srcs_cv raspicam_cv.cpp raspicam_still_cv.cpp)
 ADD_LIBRARY(${PROJECT_NAME}_cv ${hdrs_cv} ${srcs_cv} ${srcs_base})
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES 				# create *nix style library versions + symbolic links
@@ -47,7 +47,12 @@ ENDIF()
 	
 	
 #Installation of all header files	
+if ( ament_cmake_FOUND )
+INSTALL(FILES ${hdrs_cv}
+	DESTINATION include/${PROJECT_NAME}
+	COMPONENT main)
+else()
 INSTALL(FILES ${public_hdrs_base} ${hdrs_cv}
 	DESTINATION include/${PROJECT_NAME}
 	COMPONENT main)
-
+endif()
