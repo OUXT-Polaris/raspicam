@@ -55,7 +55,7 @@ if ( ament_cmake_FOUND )
     set( RASPICAM_LIB_DESTINATION   lib )
     set( RASPICAM_INC_DESTINATION   include )
     set( RASPICAM_BIN_DESTINATION   bin )
-    #ament_export_include_directories(include)
+    ament_export_include_directories(include)
 
     ament_export_libraries(${LIB_COMPONENTS})
     ament_package()
