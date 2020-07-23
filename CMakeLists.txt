@@ -57,6 +57,10 @@ if ( ament_cmake_FOUND )
     set( RASPICAM_BIN_DESTINATION   bin )
     ament_export_include_directories(include)
 
+    INSTALL( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
+        DESTINATION ${RASPICAM_INC_DESTINATION}
+        FILES_MATCHING PATTERN "*.h*")
+
     ament_export_libraries(${LIB_COMPONENTS})
     ament_package()
 else()
