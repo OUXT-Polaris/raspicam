@@ -27,7 +27,7 @@ ENDIF()
 #   Find Dependencies
 # ----------------------------------------------------------------------------
 #Add include to dependencies dir
-include_directories(${PROJECT_SOURCE_DIR}/dependencies ${PROJECT_SOURCE_DIR}/dependencies/mmal  ${PROJECT_SOURCE_DIR}/dependencies/vcos)
+include_directories(${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/dependencies ${PROJECT_SOURCE_DIR}/dependencies/mmal  ${PROJECT_SOURCE_DIR}/dependencies/vcos)
 #find the mmal libraries(I use conditional because I normally comile in pc)
 
 if(${CMAKE_SYSTEM_PROCESSOR} MATCHES arm*) 
